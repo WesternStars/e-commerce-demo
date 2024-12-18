@@ -1,8 +1,11 @@
 package com.bymdev.artem.ecommercedemo.controller;
 
 import com.bymdev.artem.ecommercedemo.entity.Category;
+import com.bymdev.artem.ecommercedemo.request.CreateCatalogRequest;
+import com.bymdev.artem.ecommercedemo.request.UpdateCatalogRequest;
 import com.bymdev.artem.ecommercedemo.service.CategoryService;
 import lombok.AllArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,12 +29,12 @@ public class CategoryController {
 
     @PostMapping("/")
     @ResponseStatus(CREATED)
-    public void createCategory(@RequestBody Category category) {
-        categoryService.createCategory(category);
+    public void createCategory(@Validated @RequestBody CreateCatalogRequest request) {
+        categoryService.createCategory(request);
     }
 
     @PutMapping("/")
-    public void updateCategory(@RequestBody Category category) {
-        categoryService.updateCategory(category);
+    public void updateCategory(@Validated @RequestBody UpdateCatalogRequest request) {
+        categoryService.updateCategory(request);
     }
 }
