@@ -19,6 +19,10 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    public Product getProduct(String sku) {
+        return productRepository.findById(sku).orElseThrow();
+    }
+
     public List<Product> getProducts(int count, int page) {
         Iterable<Product> all = productRepository.findAll(PageRequest.of(page, count));
         List<Product> products = new ArrayList<>();

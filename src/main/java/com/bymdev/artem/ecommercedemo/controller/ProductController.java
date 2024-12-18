@@ -28,6 +28,11 @@ public class ProductController {
         return productService.getProducts(count, page);
     }
 
+    @GetMapping("/{sku}")
+    public Product getProduct(@PathVariable String sku) {
+        return productService.getProduct(sku);
+    }
+
     @PostMapping("/")
     @ResponseStatus(CREATED)
     public void createProduct(@Validated @RequestBody ProductAddOrUpdateRequest request) {

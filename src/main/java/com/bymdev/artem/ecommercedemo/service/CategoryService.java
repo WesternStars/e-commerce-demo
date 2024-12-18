@@ -17,7 +17,11 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public List<Category> getCategory(int count, int page) {
+    public Category getCategory(int id) {
+        return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    public List<Category> getCategories(int count, int page) {
         Iterable<Category> all = categoryRepository.findAll(PageRequest.of(page, count));
         List<Category> categories = new ArrayList<>();
         all.forEach(categories::add);
