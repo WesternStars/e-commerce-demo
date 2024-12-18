@@ -2,21 +2,19 @@ package com.bymdev.artem.ecommercedemo.controller;
 
 import com.bymdev.artem.ecommercedemo.entity.Category;
 import com.bymdev.artem.ecommercedemo.service.CategoryService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/category")
 public class CategoryController {
 
     CategoryService categoryService;
-
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     @GetMapping("/")
     public List<Category> getCategory(
