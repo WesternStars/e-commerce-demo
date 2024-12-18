@@ -22,10 +22,10 @@ CREATE TABLE order_item
 (
     id         serial PRIMARY KEY,
     quantity   integer NOT NULL,
-    product_id integer NOT NULL REFERENCES product
+    product_sku varchar(15) NOT NULL REFERENCES product
 );
 
-CREATE TABLE order
+CREATE TABLE e_order
 (
     id           serial PRIMARY KEY,
     total_amount integer NOT NULL
