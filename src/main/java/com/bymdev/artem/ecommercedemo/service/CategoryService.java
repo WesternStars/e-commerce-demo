@@ -3,6 +3,7 @@ package com.bymdev.artem.ecommercedemo.service;
 import com.bymdev.artem.ecommercedemo.entity.Category;
 import com.bymdev.artem.ecommercedemo.repository.CategoryRepository;
 import com.bymdev.artem.ecommercedemo.request.CreateCatalogRequest;
+import com.bymdev.artem.ecommercedemo.request.UpdateCatalogRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,11 @@ public class CategoryService {
         return categories;
     }
 
-    public void createCategory(CreateCatalogRequest category) {
-        categoryRepository.save(category);
+    public void createCategory(CreateCatalogRequest request) {
+        categoryRepository.save(new Category(null, request.name()));
     }
 
-    public void updateCategory(Category category) {
-        categoryRepository.save(category);
+    public void updateCategory(UpdateCatalogRequest request) {
+        categoryRepository.save(new Category(request.id(), request.name()));
     }
 }
