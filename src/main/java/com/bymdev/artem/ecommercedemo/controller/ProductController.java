@@ -28,8 +28,8 @@ public class ProductController {
 
     @PostMapping("/")
     @ResponseStatus(CREATED)
-    public void creatProduct(@RequestBody Product product) {
-        productService.creatProduct(product);
+    public void createProduct(@RequestBody Product product) {
+        productService.createProduct(product);
     }
 
     @PutMapping("/")

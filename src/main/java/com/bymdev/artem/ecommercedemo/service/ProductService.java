@@ -2,6 +2,7 @@ package com.bymdev.artem.ecommercedemo.service;
 
 import com.bymdev.artem.ecommercedemo.entity.Product;
 import com.bymdev.artem.ecommercedemo.repository.ProductRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -9,13 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class ProductService {
 
-    ProductRepository productRepository;
-
-    public ProductService(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
+    private final ProductRepository productRepository;
 
     public List<Product> getProducts(int count, int page) {
         Iterable<Product> all = productRepository.findAll(PageRequest.of(page, count));
@@ -24,7 +22,7 @@ public class ProductService {
         return products;
     }
 
-    public void creatProduct(Product product) {
+    public void createProduct(Product product) {
         productRepository.save(product);
     }
 
