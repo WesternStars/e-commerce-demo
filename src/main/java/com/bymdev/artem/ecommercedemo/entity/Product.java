@@ -5,12 +5,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
-@EqualsAndHashCode
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {

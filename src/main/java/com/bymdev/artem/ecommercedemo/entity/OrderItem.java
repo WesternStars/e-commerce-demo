@@ -3,12 +3,10 @@ package com.bymdev.artem.ecommercedemo.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
-@EqualsAndHashCode
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItem {
