@@ -41,10 +41,8 @@ public class OrderItemController {
     }
 
     @PutMapping("/{id}")
-    public void updateOrderItem(
-            @Positive(message = "The orderItem id must be greater than 0") @PathVariable Integer id,
-            @Validated @RequestBody OrderItemRequest request
-    ) {
+    public void updateOrderItem(@Positive(message = "The orderItem id must be greater than 0") @PathVariable Integer id,
+                                @Validated @RequestBody OrderItemRequest request) {
         orderItemService.updateOrderItem(id, request);
     }
 }

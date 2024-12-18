@@ -4,7 +4,7 @@ import com.bymdev.artem.ecommercedemo.entity.Category;
 import com.bymdev.artem.ecommercedemo.entity.Product;
 import com.bymdev.artem.ecommercedemo.repository.CategoryRepository;
 import com.bymdev.artem.ecommercedemo.repository.ProductRepository;
-import com.bymdev.artem.ecommercedemo.request.ProductAddOrUpdateRequest;
+import com.bymdev.artem.ecommercedemo.request.ProductRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class ProductService {
         return products;
     }
 
-    public void createOrUpdateProduct(ProductAddOrUpdateRequest request) {
+    public void createOrUpdateProduct(ProductRequest request) {
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         Product product = new Product(request.sku(), request.name(), request.price(), category);

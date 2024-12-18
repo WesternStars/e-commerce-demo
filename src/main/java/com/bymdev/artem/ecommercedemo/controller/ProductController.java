@@ -1,7 +1,7 @@
 package com.bymdev.artem.ecommercedemo.controller;
 
 import com.bymdev.artem.ecommercedemo.entity.Product;
-import com.bymdev.artem.ecommercedemo.request.ProductAddOrUpdateRequest;
+import com.bymdev.artem.ecommercedemo.request.ProductRequest;
 import com.bymdev.artem.ecommercedemo.service.ProductService;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -35,12 +35,12 @@ public class ProductController {
 
     @PostMapping("/")
     @ResponseStatus(CREATED)
-    public void createProduct(@Validated @RequestBody ProductAddOrUpdateRequest request) {
+    public void createProduct(@Validated @RequestBody ProductRequest request) {
         productService.createOrUpdateProduct(request);
     }
 
     @PutMapping("/")
-    public void updateProduct(@Validated @RequestBody ProductAddOrUpdateRequest request) {
+    public void updateProduct(@Validated @RequestBody ProductRequest request) {
         productService.createOrUpdateProduct(request);
     }
 

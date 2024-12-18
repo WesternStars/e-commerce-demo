@@ -1,8 +1,7 @@
 package com.bymdev.artem.ecommercedemo.controller;
 
 import com.bymdev.artem.ecommercedemo.entity.Category;
-import com.bymdev.artem.ecommercedemo.request.CreateCatalogRequest;
-import com.bymdev.artem.ecommercedemo.request.UpdateCatalogRequest;
+import com.bymdev.artem.ecommercedemo.request.CatalogRequest;
 import com.bymdev.artem.ecommercedemo.service.CategoryService;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
@@ -37,12 +36,13 @@ public class CategoryController {
 
     @PostMapping("/")
     @ResponseStatus(CREATED)
-    public void createCategory(@RequestBody CreateCatalogRequest request) {
+    public void createCategory(@Validated @RequestBody CatalogRequest request) {
         categoryService.createCategory(request);
     }
 
-    @PutMapping("/")
-    public void updateCategory(@RequestBody UpdateCatalogRequest request) {
-        categoryService.updateCategory(request);
+    @PutMapping("/{id}")
+    public void updateCategory(@Positive(message = "The category id must be greater than 0") @PathVariable Integer id,
+                               @Validated @RequestBody CatalogRequest request) {
+        categoryService.updateCategory(id, request);
     }
 }

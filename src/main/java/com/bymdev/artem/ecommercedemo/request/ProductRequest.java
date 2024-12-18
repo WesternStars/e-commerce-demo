@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public record ProductAddOrUpdateRequest(
+public record ProductRequest(
         @NotEmpty(message = "The sku is required.")
         String sku,
         @NotEmpty(message = "The name is required.")
