@@ -1,7 +1,7 @@
 package com.bymdev.artem.ecommercedemo.controller;
 
-import com.bymdev.artem.ecommercedemo.entity.Product;
 import com.bymdev.artem.ecommercedemo.request.ProductRequest;
+import com.bymdev.artem.ecommercedemo.response.ProductResponse;
 import com.bymdev.artem.ecommercedemo.service.ProductService;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -15,13 +15,13 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Validated
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 public class ProductController {
 
     private final ProductService productService;
 
     @GetMapping("/")
-    public List<Product> getProducts(
+    public List<ProductResponse> getProducts(
             @Min (value = 1, message = "The count must be greater than 0") @RequestParam(value = "count", defaultValue = "20") int count,
             @Min (value = 0, message = "The page started from 0") @RequestParam(value = "page", defaultValue = "0") int page
     ) {
@@ -29,19 +29,24 @@ public class ProductController {
     }
 
     @GetMapping("/{sku}")
-    public Product getProduct(@PathVariable String sku) {
+    public ProductResponse getProduct(@PathVariable String sku) {
         return productService.getProduct(sku);
     }
 
     @PostMapping("/")
     @ResponseStatus(CREATED)
-    public void createProduct(@Validated @RequestBody ProductRequest request) {
-        productService.createOrUpdateProduct(request);
+    public ProductResponse createProduct(@Validated @RequestBody ProductRequest request) {
+        return productService.createProduct(request);
     }
 
     @PutMapping("/")
-    public void updateProduct(@Validated @RequestBody ProductRequest request) {
-        productService.createOrUpdateProduct(request);
+    public ProductResponse updateProduct(@Validated @RequestBody ProductRequest request) {
+        return productService.updateProduct(request);
+    }
+
+    @DeleteMapping("/{sku}")
+    public void deleteProduct(@PathVariable String sku) {
+        productService.deleteProduct(sku);
     }
 
 }
