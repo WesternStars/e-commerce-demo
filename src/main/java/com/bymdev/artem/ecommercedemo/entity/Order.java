@@ -18,6 +18,6 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Double total_amount;
-    @OneToMany
+    @OneToMany(mappedBy="order")
     private List<OrderItem> orderItems;
 }

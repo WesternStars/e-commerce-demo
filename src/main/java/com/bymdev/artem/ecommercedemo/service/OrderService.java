@@ -41,7 +41,9 @@ public class OrderService {
                 .map(i -> i.getQuantity() * i.getProduct().getPrice())
                 .reduce(0.0, Double::sum);
         Order order = new Order(null, totalAmount, items);
-        orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        List<OrderItem> assignmentItems = items.stream().peek(orderItem -> orderItem.setOrder(saved)).toList();
+        orderItemRepository.saveAll(assignmentItems);
     }
 
     public void updateOrder(int id, OrderRequest request) {

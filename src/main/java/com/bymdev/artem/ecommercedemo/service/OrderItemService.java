@@ -32,11 +32,11 @@ public class OrderItemService {
 
     public void createOrderItem(OrderItemRequest request) {
         Product product = productRepository.findById(request.productSku()).orElseThrow();
-        orderItemRepository.save(new OrderItem(null, request.quantity(), product));
+        orderItemRepository.save(new OrderItem(null, request.quantity(), product, null));
     }
 
     public void updateOrderItem(int id, OrderItemRequest request) {
         Product product = productRepository.findById(request.productSku()).orElseThrow();
-        orderItemRepository.save(new OrderItem(id, request.quantity(), product));
+        orderItemRepository.save(new OrderItem(id, request.quantity(), product, null));
     }
 }
