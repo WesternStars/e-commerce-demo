@@ -21,51 +21,49 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
 
-    public OrderItemResponse getOrderItem(int id) {
-        OrderItem item = orderItemRepository.findById(id).orElseThrow();
+    public static OrderItemResponse mapToResponse(OrderItem item) {
         return new OrderItemResponse(
                 item.getId(),
                 item.getQuantity(),
                 item.getProduct().getSku(),
                 Optional.ofNullable(item.getOrder()).map(Order::getId).orElse(0)
         );
+    }
+
+    public OrderItemResponse getOrderItem(int id) {
+        return mapToResponse(orderItemRepository.findById(id).orElseThrow());
     }
 
     public List<OrderItemResponse> getOrderItems(int count, int page) {
         return orderItemRepository.findAll(PageRequest.of(page, count))
                 .stream()
-                .map(item -> new OrderItemResponse(
-                        item.getId(),
-                        item.getQuantity(),
-                        item.getProduct().getSku(),
-                        Optional.ofNullable(item.getOrder()).map(Order::getId).orElse(0)
-                ))
+                .map(OrderItemService::mapToResponse)
                 .toList();
     }
 
     public OrderItemResponse createOrderItem(OrderItemRequest request) {
-        Product product = productRepository.findById(request.productSku()).orElseThrow();
-        OrderItem item = orderItemRepository.save(new OrderItem(null, request.quantity(), product, null));
-        return new OrderItemResponse(
-                item.getId(),
-                item.getQuantity(),
-                item.getProduct().getSku(),
-                Optional.ofNullable(item.getOrder()).map(Order::getId).orElse(0)
-        );
+        return saveOrderItem(mapToOrderItem(request));
     }
 
     public OrderItemResponse updateOrderItem(int id, OrderItemRequest request) {
-        Product product = productRepository.findById(request.productSku()).orElseThrow();
-        OrderItem item = orderItemRepository.save(new OrderItem(id, request.quantity(), product, null));
-        return new OrderItemResponse(
-                item.getId(),
-                item.getQuantity(),
-                item.getProduct().getSku(),
-                Optional.ofNullable(item.getOrder()).map(Order::getId).orElse(0)
-        );
+        return saveOrderItem(mapToOrderItem(request, id));
     }
 
     public void delete(int id) {
         orderItemRepository.deleteById(id);
+    }
+
+    private OrderItem mapToOrderItem(OrderItemRequest request) {
+        return mapToOrderItem(request, null);
+    }
+
+    private OrderItem mapToOrderItem(OrderItemRequest request, Integer id) {
+        Product product = productRepository.findById(request.productSku()).orElseThrow();
+        return new OrderItem(id, request.quantity(), product, null);
+    }
+
+    private OrderItemResponse saveOrderItem(OrderItem item) {
+        OrderItem savedItem = orderItemRepository.save(item);
+        return mapToResponse(savedItem);
     }
 }

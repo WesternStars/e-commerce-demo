@@ -18,27 +18,28 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    public CategoryResponse getCategory(int id) {
-        Category category = categoryRepository.findById(id).orElseThrow();
+    public static CategoryResponse mapToResponse(Category category) {
         return new CategoryResponse(category.getId(), category.getName());
+    }
+
+    public CategoryResponse getCategory(int id) {
+        return mapToResponse(categoryRepository.findById(id).orElseThrow());
     }
 
     public List<CategoryResponse> getCategories(int count, int page) {
         return categoryRepository.findAll(PageRequest.of(page, count))
                 .stream()
-                .map(category -> new CategoryResponse(category.getId(), category.getName()))
+                .map(CategoryService::mapToResponse)
                 .toList();
     }
 
     public CategoryResponse createCategory(CatalogRequest request) {
-        Category category = categoryRepository.save(new Category(null, request.name()));
-        return new CategoryResponse(category.getId(), category.getName());
+        return saveCategory(new Category(null, request.name()));
     }
 
     public CategoryResponse updateCategory(int id, CatalogRequest request) {
         categoryRepository.findById(id).orElseThrow();
-        Category category = categoryRepository.save(new Category(id, request.name()));
-        return new CategoryResponse(category.getId(), category.getName());
+        return saveCategory(new Category(id, request.name()));
     }
 
     public void deleteCategory(int id) {
@@ -46,5 +47,10 @@ public class CategoryService {
             throw new RuntimeException("You should delete all dependencies of this category.");
         }
         categoryRepository.deleteById(id);
+    }
+
+    private CategoryResponse saveCategory(Category categorySave) {
+        Category category = categoryRepository.save(categorySave);
+        return mapToResponse(category);
     }
 }

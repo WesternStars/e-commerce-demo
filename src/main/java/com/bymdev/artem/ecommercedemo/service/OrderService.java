@@ -5,7 +5,6 @@ import com.bymdev.artem.ecommercedemo.entity.OrderItem;
 import com.bymdev.artem.ecommercedemo.repository.OrderItemRepository;
 import com.bymdev.artem.ecommercedemo.repository.OrderRepository;
 import com.bymdev.artem.ecommercedemo.request.OrderRequest;
-import com.bymdev.artem.ecommercedemo.response.OrderItemResponse;
 import com.bymdev.artem.ecommercedemo.response.OrderResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -24,37 +23,23 @@ public class OrderService {
 
     public OrderResponse getOrder(int id) {
         Order order = orderRepository.findById(id).orElseThrow();
-        return new OrderResponse(
-                order.getId(),
-                order.getTotal_amount(),
-                order.getOrderItems().stream().map(orderItem -> new OrderItemResponse(
-                        orderItem.getId(),
-                        orderItem.getQuantity(),
-                        orderItem.getProduct().getSku(),
-                        orderItem.getOrder().getId()
-                )).toList());
+        return mapToResponse(order, order.getOrderItems());
     }
 
     public List<OrderResponse> getOrders(int count, int page) {
         return orderRepository.findAll(PageRequest.of(page, count))
                 .stream()
-                .map(order -> new OrderResponse(order.getId(),
-                        order.getTotal_amount(),
-                        order.getOrderItems().stream().map(orderItem -> new OrderItemResponse(
-                                orderItem.getId(),
-                                orderItem.getQuantity(),
-                                orderItem.getProduct().getSku(),
-                                orderItem.getOrder().getId()
-                        )).toList()))
+                .map(order -> mapToResponse(order, order.getOrderItems()))
                 .toList();
     }
 
     public OrderResponse createOrder(OrderRequest request) {
-        return addOrUpdateOrder(0, request);
+        return saveOrder(request);
     }
 
     public OrderResponse updateOrder(int id, OrderRequest request) {
-        return addOrUpdateOrder(id, request);
+        orderRepository.findById(id).orElseThrow();
+        return saveOrder(request, id);
     }
 
     public void delete(int id) {
@@ -64,29 +49,44 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    private OrderResponse addOrUpdateOrder(int id, OrderRequest request) {
-        Order order = id > 0 ? orderRepository.findById(id).orElseThrow() : new Order();
+    private OrderResponse saveOrder(OrderRequest request) {
+        return saveOrder(request, null);
+    }
+
+    private OrderResponse saveOrder(OrderRequest request, Integer id) {
+        Order requestOrder = mapToOrder(id, request);
+        Order saved = orderRepository.save(requestOrder);
+        List<OrderItem> orderItems = requestOrder.getOrderItems();
+        List<OrderItem> assignedItems = orderItems.stream().peek(item -> item.setOrder(saved)).toList();
+        orderItemRepository.saveAll(assignedItems);
+        return mapToResponse(saved, assignedItems);
+    }
+
+    private Order mapToOrder(Integer id, OrderRequest request) {
+        List<OrderItem> items = getOrderItems(request.orderItemIds());
+        return new Order(id, calculateTotalAmount(items), items);
+    }
+
+    private List<OrderItem> getOrderItems(List<Integer> orderItemIds) {
         List<OrderItem> items = new ArrayList<>();
-        orderItemRepository.findAllById(request.orderItemIds()).forEach(items::add);
-        if (items.size() < request.orderItemIds().size()) {
+        orderItemRepository.findAllById(orderItemIds).forEach(items::add);
+        if (items.size() < orderItemIds.size()) {
             throw new NoSuchElementException("Could not find some items. Please check the orderItemIds.");
         }
-        Double totalAmount = items.stream()
+        return items;
+    }
+
+    private OrderResponse mapToResponse(Order order, List<OrderItem> items) {
+        return new OrderResponse(
+                order.getId(),
+                order.getTotal_amount(),
+                items.stream().map(OrderItemService::mapToResponse).toList()
+        );
+    }
+
+    private Double calculateTotalAmount(List<OrderItem> items) {
+        return items.stream()
                 .map(i -> i.getQuantity() * i.getProduct().getPrice())
                 .reduce(0.0, Double::sum);
-        order.setTotal_amount(totalAmount);
-        order.setOrderItems(items);
-        Order saved = orderRepository.save(order);
-        List<OrderItem> assignmentItems = items.stream().peek(orderItem -> orderItem.setOrder(saved)).toList();
-        orderItemRepository.saveAll(assignmentItems);
-        return new OrderResponse(
-                saved.getId(),
-                saved.getTotal_amount(),
-                assignmentItems.stream().map(orderItem -> new OrderItemResponse(
-                        orderItem.getId(),
-                        orderItem.getQuantity(),
-                        orderItem.getProduct().getSku(),
-                        orderItem.getOrder().getId()
-                )).toList());
     }
 }

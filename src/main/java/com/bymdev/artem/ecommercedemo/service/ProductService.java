@@ -6,7 +6,6 @@ import com.bymdev.artem.ecommercedemo.repository.CategoryRepository;
 import com.bymdev.artem.ecommercedemo.repository.OrderItemRepository;
 import com.bymdev.artem.ecommercedemo.repository.ProductRepository;
 import com.bymdev.artem.ecommercedemo.request.ProductRequest;
-import com.bymdev.artem.ecommercedemo.response.CategoryResponse;
 import com.bymdev.artem.ecommercedemo.response.ProductResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -23,34 +22,23 @@ public class ProductService {
     private final OrderItemRepository orderItemRepository;
 
     public ProductResponse getProduct(String sku) {
-        Product product = productRepository.findById(sku).orElseThrow();
-        return new ProductResponse(
-                product.getSku(),
-                product.getName(),
-                product.getPrice(),
-                new CategoryResponse(product.getCategory().getId(), product.getCategory().getName())
-        );
+        return mapToResponse(productRepository.findById(sku).orElseThrow());
     }
 
     public List<ProductResponse> getProducts(int count, int page) {
         return productRepository.findAll(PageRequest.of(page, count))
                 .stream()
-                .map(product -> new ProductResponse(
-                        product.getSku(),
-                        product.getName(),
-                        product.getPrice(),
-                        new CategoryResponse(product.getCategory().getId(), product.getCategory().getName())
-                ))
+                .map(this::mapToResponse)
                 .toList();
     }
 
     public ProductResponse createProduct(ProductRequest request) {
-        return saveProduct(request);
+        return saveProduct(mapToProduct(request));
     }
 
     public ProductResponse updateProduct(ProductRequest request) {
         productRepository.findById(request.sku()).orElseThrow();
-        return saveProduct(request);
+        return saveProduct(mapToProduct(request));
     }
 
     public void deleteProduct(String sku) {
@@ -60,15 +48,21 @@ public class ProductService {
         productRepository.deleteById(sku);
     }
 
-    private ProductResponse saveProduct(ProductRequest request) {
+    private Product mapToProduct(ProductRequest request) {
         Category category = categoryRepository.findById(request.categoryId()).orElseThrow();
-        Product product = new Product(request.sku(), request.name(), request.price(), category);
-        product = productRepository.save(product);
+        return new Product(request.sku(), request.name(), request.price(), category);
+    }
+
+    private ProductResponse saveProduct(Product product) {
+        return mapToResponse(productRepository.save(product));
+    }
+
+    private ProductResponse mapToResponse(Product product) {
         return new ProductResponse(
                 product.getSku(),
                 product.getName(),
                 product.getPrice(),
-                new CategoryResponse(product.getCategory().getId(), product.getCategory().getName())
+                CategoryService.mapToResponse(product.getCategory())
         );
     }
 }
