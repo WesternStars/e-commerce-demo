@@ -1,3 +1,4 @@
+--changeset apuhachov:1
 DROP TABLE IF EXISTS order_item;
 DROP TABLE IF EXISTS e_order;
 DROP TABLE IF EXISTS product;
@@ -30,10 +31,3 @@ CREATE TABLE order_item
     product_sku varchar(15) NOT NULL REFERENCES product,
     order_id    integer REFERENCES e_order
 );
-
-INSERT INTO category (name)
-VALUES ('Tools');
-
-INSERT INTO product (sku, name, price, category_id)
-VALUES ('ABC0000', 'Hammer', 1.0, 1),
-       ('ABC0001', 'Screwdriver', 1.1, 1);
