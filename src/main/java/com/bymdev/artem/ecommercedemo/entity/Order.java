@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -20,4 +21,5 @@ public class Order {
     private Double total_amount;
     @OneToMany(mappedBy="order")
     private List<OrderItem> orderItems;
+    private Timestamp createdAt;
 }

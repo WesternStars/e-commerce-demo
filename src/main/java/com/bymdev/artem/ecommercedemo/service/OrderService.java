@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -64,7 +65,7 @@ public class OrderService {
 
     private Order mapToOrder(Integer id, OrderRequest request) {
         List<OrderItem> items = getOrderItems(request.orderItemIds());
-        return new Order(id, calculateTotalAmount(items), items);
+        return new Order(id, calculateTotalAmount(items), items, new Timestamp(System.currentTimeMillis()));
     }
 
     private List<OrderItem> getOrderItems(List<Integer> orderItemIds) {
@@ -80,6 +81,7 @@ public class OrderService {
         return new OrderResponse(
                 order.getId(),
                 order.getTotal_amount(),
+                order.getCreatedAt(),
                 items.stream().map(OrderItemService::mapToResponse).toList()
         );
     }
