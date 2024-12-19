@@ -39,4 +39,8 @@ public class OrderItemService {
         Product product = productRepository.findById(request.productSku()).orElseThrow();
         orderItemRepository.save(new OrderItem(id, request.quantity(), product, null));
     }
+
+    public void delete(int id) {
+        orderItemRepository.deleteById(id);
+    }
 }

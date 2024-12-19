@@ -47,6 +47,13 @@ public class OrderService {
     }
 
     public void updateOrder(int id, OrderRequest request) {
+        //    note used
+    }
 
+    public void delete(int id) {
+        if(!orderItemRepository.findAllByOrder_Id(id).isEmpty()) {
+            throw new RuntimeException("You  should delete all dependencies of this order.");
+        }
+        orderRepository.deleteById(id);
     }
 }

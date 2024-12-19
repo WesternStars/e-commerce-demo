@@ -16,7 +16,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @Validated
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/order")
+@RequestMapping("/api/orders")
 public class OrderController {
 
     OrderService orderService;
@@ -44,5 +44,10 @@ public class OrderController {
     public void updateOrder(@Positive(message = "The order id must be greater than 0") @PathVariable Integer id,
                             @Validated @RequestBody OrderRequest request) {
         orderService.updateOrder(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteOrder(@Positive(message = "The order id must be greater than 0") @PathVariable Integer id) {
+        orderService.delete(id);
     }
 }
