@@ -22,7 +22,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping("/in_come_by_a_day")
-    public List<ReportResponse> getCategories(
+    public List<ReportResponse> getInComeByADayReport(
             @RequestParam LocalDate from,
             @RequestParam LocalDate to,
             @Min(value = 1, message = "The count must be greater than 0") @RequestParam(value = "count", defaultValue = "100") int count,

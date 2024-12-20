@@ -22,7 +22,7 @@ public class ReportService {
         if (from.isAfter(to)) {
             throw new IllegalArgumentException("from cannot be greater than to");
         }
-        return orderRepository.findNSumReportsByDayWithPagination(from, PageRequest.of(page, count))
+        return orderRepository.findSumByDayReportWithPagination(from, to, PageRequest.of(page, count))
                 .stream()
                 .map(this::matToResponse)
                 .toList();
