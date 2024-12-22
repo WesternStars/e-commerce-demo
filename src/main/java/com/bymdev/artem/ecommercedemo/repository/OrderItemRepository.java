@@ -1,6 +1,7 @@
 package com.bymdev.artem.ecommercedemo.repository;
 
 import com.bymdev.artem.ecommercedemo.entity.OrderItem;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,7 @@ public interface OrderItemRepository extends CrudRepository<OrderItem, Integer>,
     List<OrderItem> findAllByOrder_Id(Integer orderId);
 
     Collection<Object> findAllByProduct_Sku(String productSku);
+
+    @Query("SELECT i FROM OrderItem i WHERE (i.order is not null)")
+    List<OrderItem> findAllByOrderIdIsNotNull();
 }

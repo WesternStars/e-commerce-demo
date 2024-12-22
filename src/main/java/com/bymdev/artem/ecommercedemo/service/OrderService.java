@@ -1,9 +1,11 @@
 package com.bymdev.artem.ecommercedemo.service;
 
 import com.bymdev.artem.ecommercedemo.entity.Order;
+import com.bymdev.artem.ecommercedemo.entity.OrderDoc;
 import com.bymdev.artem.ecommercedemo.entity.OrderItem;
 import com.bymdev.artem.ecommercedemo.repository.OrderItemRepository;
 import com.bymdev.artem.ecommercedemo.repository.OrderRepository;
+import com.bymdev.artem.ecommercedemo.repository.SearchRepository;
 import com.bymdev.artem.ecommercedemo.request.OrderRequest;
 import com.bymdev.artem.ecommercedemo.response.OrderResponse;
 import lombok.AllArgsConstructor;
@@ -11,26 +13,45 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
 public class OrderService {
 
+    private final SearchService searchService;
     private final OrderRepository orderRepository;
+    private final SearchRepository searchRepository;
     private final OrderItemRepository orderItemRepository;
+
+    public static OrderResponse getOrderResponse(Order order, List<OrderItem> items) {
+        return new OrderResponse(
+                order.getId(),
+                order.getTotal_amount(),
+                order.getCreatedAt(),
+                items.stream().map(OrderItemService::getOrderItemResponse).toList()
+        );
+    }
+
+    private static List<OrderItem> getRefreshOrderItem(List<OrderItem> orderItems) {
+        return getRefreshOrderItem(orderItems, null);
+    }
+
+    private static List<OrderItem> getRefreshOrderItem(List<OrderItem> orderItems, Order saved) {
+        return orderItems.stream().peek(item -> item.setOrder(saved)).toList();
+    }
 
     public OrderResponse getOrder(int id) {
         Order order = orderRepository.findById(id).orElseThrow();
-        return mapToResponse(order, order.getOrderItems());
+        return getOrderResponse(order, order.getOrderItems());
     }
 
     public List<OrderResponse> getOrders(int count, int page) {
         return orderRepository.findAll(PageRequest.of(page, count))
                 .stream()
-                .map(order -> mapToResponse(order, order.getOrderItems()))
+                .map(order -> getOrderResponse(order, order.getOrderItems()))
                 .toList();
     }
 
@@ -47,7 +68,8 @@ public class OrderService {
         if (!orderItemRepository.findAllByOrder_Id(id).isEmpty()) {
             throw new RuntimeException("You  should delete all dependencies of this order.");
         }
-        orderRepository.deleteById(id);
+        Optional<Order> optionalOrder = orderRepository.findById(id);
+        optionalOrder.ifPresent(order -> doDelete(id));
     }
 
     private OrderResponse saveOrder(OrderRequest request) {
@@ -55,12 +77,41 @@ public class OrderService {
     }
 
     private OrderResponse saveOrder(OrderRequest request, Integer id) {
-        Order requestOrder = mapToOrder(id, request);
-        Order saved = orderRepository.save(requestOrder);
-        List<OrderItem> orderItems = requestOrder.getOrderItems();
-        List<OrderItem> assignedItems = orderItems.stream().peek(item -> item.setOrder(saved)).toList();
-        orderItemRepository.saveAll(assignedItems);
-        return mapToResponse(saved, assignedItems);
+        Order order = mapToOrder(id, request);
+        List<OrderItem> orderItems = order.getOrderItems();
+
+        List<OrderItem> deletedItems = getRefreshOrderItem(deletedItemsFromOrder(id, orderItems));
+        List<OrderItem> attachedItems = getRefreshOrderItem(orderItems, order);
+        List<OrderItem> allItems = concat(attachedItems, deletedItems);
+        orderItemRepository.saveAll(allItems);
+        updateElasticIndex(allItems);
+
+        return getOrderResponse(order, attachedItems);
+    }
+
+    private List<OrderItem> concat(List<OrderItem> list1, List<OrderItem> list2) {
+        return Stream.concat(list1.stream(), list2.stream()).toList();
+    }
+
+    private List<OrderItem> deletedItemsFromOrder(Integer id, List<OrderItem> newItems) {
+        List<OrderItem> oldItems = orderItemRepository.findAllByOrder_Id(id);
+        if (oldItems.size() > newItems.size()) {
+            return oldItems.stream().filter(i -> !newItems.contains(i)).toList();
+        }
+        return List.of();
+    }
+
+    private void updateElasticIndex(List<OrderItem> items) {
+        Map<Boolean, List<OrderDoc>> orderDocs = items.stream()
+                .map(item -> searchService.getOrderDoc(item.getProduct()))
+                .collect(Collectors.partitioningBy(o -> o.getOrderIdList().isEmpty()));
+        searchRepository.saveAll(orderDocs.get(false));
+        searchRepository.deleteAll(orderDocs.get(true));
+    }
+
+    private void doDelete(int id) {
+        orderRepository.deleteById(id);
+        updateElasticIndex(getRefreshOrderItem(deletedItemsFromOrder(id, List.of())));
     }
 
     private Order mapToOrder(Integer id, OrderRequest request) {
@@ -75,15 +126,6 @@ public class OrderService {
             throw new NoSuchElementException("Could not find some items. Please check the orderItemIds.");
         }
         return items;
-    }
-
-    private OrderResponse mapToResponse(Order order, List<OrderItem> items) {
-        return new OrderResponse(
-                order.getId(),
-                order.getTotal_amount(),
-                order.getCreatedAt(),
-                items.stream().map(OrderItemService::mapToResponse).toList()
-        );
     }
 
     private Double calculateTotalAmount(List<OrderItem> items) {

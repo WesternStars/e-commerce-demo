@@ -21,23 +21,23 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
 
-    public static OrderItemResponse mapToResponse(OrderItem item) {
+    public static OrderItemResponse getOrderItemResponse(OrderItem item) {
         return new OrderItemResponse(
                 item.getId(),
                 item.getQuantity(),
-                item.getProduct().getSku(),
+                ProductService.getProductResponse(item.getProduct()),
                 Optional.ofNullable(item.getOrder()).map(Order::getId).orElse(0)
         );
     }
 
     public OrderItemResponse getOrderItem(int id) {
-        return mapToResponse(orderItemRepository.findById(id).orElseThrow());
+        return getOrderItemResponse(orderItemRepository.findById(id).orElseThrow());
     }
 
     public List<OrderItemResponse> getOrderItems(int count, int page) {
         return orderItemRepository.findAll(PageRequest.of(page, count))
                 .stream()
-                .map(OrderItemService::mapToResponse)
+                .map(OrderItemService::getOrderItemResponse)
                 .toList();
     }
 
@@ -64,6 +64,6 @@ public class OrderItemService {
 
     private OrderItemResponse saveOrderItem(OrderItem item) {
         OrderItem savedItem = orderItemRepository.save(item);
-        return mapToResponse(savedItem);
+        return getOrderItemResponse(savedItem);
     }
 }

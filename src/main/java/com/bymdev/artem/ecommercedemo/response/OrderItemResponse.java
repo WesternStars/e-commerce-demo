@@ -1,4 +1,4 @@
 package com.bymdev.artem.ecommercedemo.response;
 
-public record OrderItemResponse(Integer id, Integer quantity, String productSku, Integer orderId) {
+public record OrderItemResponse(Integer id, Integer quantity, ProductResponse product, Integer orderId) {
 }

@@ -18,18 +18,18 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    public static CategoryResponse mapToResponse(Category category) {
+    public static CategoryResponse getCategoryResponse(Category category) {
         return new CategoryResponse(category.getId(), category.getName());
     }
 
     public CategoryResponse getCategory(int id) {
-        return mapToResponse(categoryRepository.findById(id).orElseThrow());
+        return getCategoryResponse(categoryRepository.findById(id).orElseThrow());
     }
 
     public List<CategoryResponse> getCategories(int count, int page) {
         return categoryRepository.findAll(PageRequest.of(page, count))
                 .stream()
-                .map(CategoryService::mapToResponse)
+                .map(CategoryService::getCategoryResponse)
                 .toList();
     }
 
@@ -51,6 +51,6 @@ public class CategoryService {
 
     private CategoryResponse saveCategory(Category categorySave) {
         Category category = categoryRepository.save(categorySave);
-        return mapToResponse(category);
+        return getCategoryResponse(category);
     }
 }
