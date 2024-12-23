@@ -19,7 +19,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/api/order-items")
 public class OrderItemController {
 
-    OrderItemService orderItemService;
+    private final OrderItemService orderItemService;
 
     @GetMapping("/")
     public List<OrderItemResponse> getOrderItems(

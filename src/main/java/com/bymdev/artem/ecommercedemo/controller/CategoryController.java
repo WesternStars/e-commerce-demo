@@ -19,7 +19,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/api/categories")
 public class CategoryController {
 
-    CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @GetMapping("/")
     public List<CategoryResponse> getCategories(

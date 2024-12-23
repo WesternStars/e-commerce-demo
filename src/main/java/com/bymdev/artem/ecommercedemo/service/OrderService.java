@@ -65,11 +65,7 @@ public class OrderService {
     }
 
     public void delete(int id) {
-        if (!orderItemRepository.findAllByOrder_Id(id).isEmpty()) {
-            throw new RuntimeException("You  should delete all dependencies of this order.");
-        }
-        Optional<Order> optionalOrder = orderRepository.findById(id);
-        optionalOrder.ifPresent(order -> doDelete(id));
+        orderRepository.findById(id).ifPresent(order -> doDelete(id));
     }
 
     private OrderResponse saveOrder(OrderRequest request) {
@@ -77,7 +73,7 @@ public class OrderService {
     }
 
     private OrderResponse saveOrder(OrderRequest request, Integer id) {
-        Order order = mapToOrder(id, request);
+        Order order = orderRepository.save(getOrder(id, request));
         List<OrderItem> orderItems = order.getOrderItems();
 
         List<OrderItem> deletedItems = getRefreshOrderItem(deletedItemsFromOrder(id, orderItems));
@@ -114,7 +110,7 @@ public class OrderService {
         updateElasticIndex(getRefreshOrderItem(deletedItemsFromOrder(id, List.of())));
     }
 
-    private Order mapToOrder(Integer id, OrderRequest request) {
+    private Order getOrder(Integer id, OrderRequest request) {
         List<OrderItem> items = getOrderItems(request.orderItemIds());
         return new Order(id, calculateTotalAmount(items), items, new Timestamp(System.currentTimeMillis()));
     }
