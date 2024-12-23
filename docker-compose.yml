@@ -7,3 +7,11 @@ services:
       - POSTGRES_PASSWORD=S3cret
       - POSTGRES_USER=user
       - POSTGRES_DB=e-commerce
+  elasticsearch:
+    image: elastic/elasticsearch:8.17.0
+    ports:
+      - 9200:9200
+    environment:
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=4SXmyR-w*+p=F6iHfJUY
